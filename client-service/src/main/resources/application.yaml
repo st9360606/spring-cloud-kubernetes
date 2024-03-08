@@ -1,0 +1,36 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application.name: client-service
+  cloud:
+    kubernetes:
+      config:
+        enabled: true
+      reload:
+        enabled: true
+        strategy: refresh
+        mode: event
+      discovery:
+        enabled: true
+        all-namespaces: true
+        primary-port-name: "default-http"
+#        discovery-server-url: "http://myapp-discoveryserver"
+        discovery-server-url: "http://spring-cloud-kubernetes-discoveryserver:80"
+        include-not-ready-addresses: true
+server.port: 8080
+management:
+  endpoints:
+    restart:
+      enabled: true
+    health:
+      enabled: true
+    info:
+      enabled: true
+    web:
+      exposure:
+        include: "*"
+ribbon:
+  http:
+    client:
+      enabled: true
+      connect-timeout: 3000

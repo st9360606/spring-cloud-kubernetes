@@ -1,0 +1,65 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: client-service
+spec:
+  selector:
+    app: client-service
+  ports:
+  - protocol: TCP
+    port: 8080
+    nodePort: 30083
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-service
+spec:
+  selector:
+      matchLabels:
+        app: client-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: client-service
+    spec:
+      containers:
+        - name: client-service
+          image: client-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+
+
+
+
+#kind: Service: 指定資源類型為 Service。
+#metadata: 元資料部分，包含服務的名稱。
+#name: 定義了服務的名稱，這是 Kubernetes 叢集內唯一的識別碼。
+#namespace: 定義了服務所屬的命名空間。
+#spec: 描述服務規範的部分。
+#selector: 選擇將流量轉送到哪些 Pod。 這裡選擇 app: travel-agency-service，與 Deployment 中定義的標籤相符。
+#ports: 指定服務監聽的連接埠配置。
+#protocol: 使用的協定（TCP）。
+#port: Service 在叢集內部使用的連接埠。
+#nodePort: 在 Node 上公開服務的連接埠。 透過該端口，可以從集群外存取服務。
+#type: NodePort: 表示建立一個 NodePort 類型的服務。
+#
+#apiVersion: apps/v1: 指定資源 API 版本為 apps/v1。
+#kind: Deployment: 指定資源類型為 Deployment。
+#metadata: 元資料部分，包含部署的名稱。
+#spec: 描述部署規範的部分。
+#selector: 用於選擇與 Deployment 相關聯的 Pod 的標籤。 這裡選擇 app: travel-agency-service。
+#replicas: 2: 指定要建立的 Pod 的副本分片數。
+#
+#template: 描述要建立的 Pod 的範本。
+#metadata: 包含 Pod 標籤。
+#spec: 描述 Pod 規範的部分。
+#containers: 容器配置部分。
+#name: 容器的名稱。
+#image: 使用的容器鏡像。
+#imagePullPolicy: Never: 告訴 Kubernetes 不要嘗試從遠端鏡像倉庫拉取鏡像。
+#ports: 容器監聽的連接埠配置。
+#env: 環境變數配置，從名為 db-secret 的 Secret 中取得 MongoDB 的使用者名稱和密碼。

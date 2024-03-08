@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: List
+items:
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: spring-cloud-kubernetes-discoveryserver
+      name: spring-cloud-kubernetes-discoveryserver
+    spec:
+      ports:
+        - name: http
+          port: 80
+          targetPort: 8761
+      selector:
+        app: spring-cloud-kubernetes-discoveryserver
+      type: ClusterIP
+  - apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      labels:
+        app: spring-cloud-kubernetes-discoveryserver
+      name: discovery-server-service-account
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: discovery-server-cluster-role
+    rules:
+      - apiGroups: [""]
+        resources: ["pods", "services", "endpoints"]
+        verbs: ["get", "list"]
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    metadata:
+      name: discovery-server-cluster-role-binding
+    subjects:
+      - kind: ServiceAccount
+        name: discovery-server-service-account
+        namespace: default
+    roleRef:
+      kind: ClusterRole
+      name: discovery-server-cluster-role
+      apiGroup: rbac.authorization.k8s.io
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: spring-cloud-kubernetes-discoveryserver-deployment
+    spec:
+      selector:
+        matchLabels:
+          app: spring-cloud-kubernetes-discoveryserver
+      template:
+        metadata:
+          labels:
+            app: spring-cloud-kubernetes-discoveryserver
+        spec:
+          serviceAccountName: discovery-server-service-account
+          containers:
+            - name: spring-cloud-kubernetes-discoveryserver
+              image: springcloud/spring-cloud-kubernetes-discoveryserver:3.0.0-SNAPSHOT
+              imagePullPolicy: IfNotPresent
+              readinessProbe:
+                httpGet:
+                  port: 8761
+                  path: /actuator/health/readiness
+                initialDelaySeconds: 45
+                timeoutSeconds: 10
+                periodSeconds: 10
+              livenessProbe:
+                httpGet:
+                  port: 8761
+                  path: /actuator/health/liveness
+                initialDelaySeconds: 60
+                timeoutSeconds: 10
+                periodSeconds: 20
+              ports:
+                - containerPort: 8761
